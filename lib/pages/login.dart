@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class login_page extends StatefulWidget {
   const login_page({super.key});
@@ -177,12 +178,17 @@ class _login_pageState extends State<login_page> {
                   "Don’t have an account?",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                Text(
-                  "Register",
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey),
+                InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(context, "/create_account");
+                  },
+                  child: Text(
+                    "Register",
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey),
+                  ),
                 )
               ],
             ),

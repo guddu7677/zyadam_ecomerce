@@ -219,6 +219,32 @@ class _My_AccountState extends State<My_Account> {
                   trailing: Icon(Icons.keyboard_arrow_right_outlined),
                 ),
               ),
+              SizedBox(height: 15),
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white
+                          .withOpacity(0.5), // White shadow with opacity
+                      offset: Offset(4, 4), // Shadow position
+                      blurRadius: 10, // How much blur the shadow has
+                      spreadRadius: 2, // How much the shadow spreads
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.logout),
+                  title: Text(
+                    "Log out",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                  ),
+                  trailing: Icon(Icons.keyboard_arrow_right_outlined),
+                ),
+              ),
             ],
           ),
         ),
