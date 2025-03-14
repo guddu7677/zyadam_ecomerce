@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:zyadam_ecomere/tabBar/all.dart';
+import 'package:zyadam_ecomere/drawer/short_by.dart';
+import 'package:zyadam_ecomere/tabBar/all_tab.dart';
 
 class Category_page extends StatefulWidget {
   const Category_page({super.key});
@@ -66,16 +67,30 @@ class _Category_pageState extends State<Category_page> {
                       color: Colors.white,
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(8)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.unfold_more),
-                      Text(
-                        "Short by",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                    ],
+                  child: InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                          context: context,
+                          shape: BeveledRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(6),
+                            topRight: Radius.circular(6),
+                          )),
+                          builder: ((context) {
+                            return short_by();
+                          }));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.unfold_more),
+                        Text(
+                          "Short by",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

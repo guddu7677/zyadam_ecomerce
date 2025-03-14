@@ -20,6 +20,59 @@ class _AddCardState extends State<AddCard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: BottomAppBar(
+        height: 60,
+        child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, "/My_Cart");
+                },
+                child: Container(
+                  height: 40,
+                  width: 120,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: Colors.green),
+                  child: Center(
+                    child: Text(
+                      "ADD to Cart",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, "/Order_Summary");
+                },
+                child: Container(
+                  height: 40,
+                  width: 120,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: Colors.green),
+                  child: Center(
+                    child: Text(
+                      "Buy Now",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(),
       body: ListView(
         children: [
@@ -134,24 +187,6 @@ class _AddCardState extends State<AddCard> {
             child: Text(
               "Descreption",
               style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 24, left: 24, top: 200),
-            child: Container(
-              height: 43,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  color: Colors.green, borderRadius: BorderRadius.circular(8)),
-              child: Center(
-                child: Text(
-                  "Add To Cart",
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-              ),
             ),
           ),
         ],
