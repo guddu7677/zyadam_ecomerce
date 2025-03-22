@@ -42,7 +42,7 @@ class _login_signupState extends State<login_signup> {
             children: [
               InkWell(
                 onTap: () {
-                  Navigator.pushNamed(context, "/Bottombar");
+                  Navigator.pushNamed(context, "/CreateAccount");
                 },
                 child: Container(
                   height: 50,

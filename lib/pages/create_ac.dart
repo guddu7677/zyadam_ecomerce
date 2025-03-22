@@ -1,47 +1,90 @@
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class create_account extends StatefulWidget {
-  const create_account({super.key});
+class CreateAccount extends StatefulWidget {
+  const CreateAccount({super.key});
 
   @override
-  State<create_account> createState() => _create_accountState();
+  State<CreateAccount> createState() => _CreateAccountState();
 }
 
-class _create_accountState extends State<create_account> {
-  TextEditingController firsnameController = TextEditingController();
-  TextEditingController lastnameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+class _CreateAccountState extends State<CreateAccount> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController firstnameController = TextEditingController();
+  final TextEditingController lastnameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final storage = const FlutterSecureStorage();
+  final String apiUrl = dotenv.env['FLUTTER_API_URL'] ?? '';
 
-  bool _isNotvalide = false;
+  bool _isLoading = false;
+  String? _errorMessage;
 
-  void registerUser() async {
-    if (emailController.text.isNotEmpty &&
-        passwordController.text.isNotEmpty &&
-        phoneController.text.isNotEmpty &&
-        firsnameController.text.isNotEmpty &&
-        lastnameController.text.isNotEmpty) {
-      var regBody = {
-        "fiestname": firsnameController.text,
-        "lastname": lastnameController.text,
-        "phone": phoneController.text,
-        "email": emailController.text,
-        "password": passwordController.text,
-      };
+  void _toggleLoading(bool value) {
+    if (mounted) {
+      setState(() => _isLoading = value);
+    }
+  }
+
+  Future<void> registerUser() async {
+    if (!_formKey.currentState!.validate()) return;
+    _toggleLoading(true);
+    _errorMessage = null;
+    FocusScope.of(context).unfocus();
+
+    var regBody = {
+      "first_name": firstnameController.text.trim(),
+      "last_name": lastnameController.text.trim(),
+      "phone": phoneController.text.trim(),
+      "email": emailController.text.trim(),
+      "password": passwordController.text.trim(),
+    };
+
+    try {
       var response = await http.post(
-        Uri.parse("uri"),
-        headers: {"content-type": "application/json"},
+        Uri.parse("$apiUrl/account/user/register"),
+        headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );
-      print(response);
-    } else {
-      setState(() {
-        _isNotvalide = true;
-      });
+      print("$apiUrl/account/user/register");
+
+      var responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        setState(() =>
+            _errorMessage = responseData['msg'] ?? "Registration succesfully.");
+        Navigator.pushNamed(context, "/login_page");
+      } else {
+        setState(() =>
+            _errorMessage = responseData['error'] ?? "Registration failed.");
+      }
+    } on SocketException {
+      setState(() => _errorMessage = "No Internet connection.");
+    } catch (e) {
+      setState(() => _errorMessage = "An error occurred. Please try again.");
+    }
+    _toggleLoading(false);
+  }
+
+  Future<void> notifyAdmin(Map<String, dynamic> userDetails) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$apiUrl/admin/notify_new_user/"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(userDetails),
+      );
+
+      if (response.statusCode != 200) {
+        print("Failed to notify admin");
+      }
+    } catch (e) {
+      print("Error notifying admin: $e");
     }
   }
 
@@ -49,283 +92,77 @@ class _create_accountState extends State<create_account> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8, left: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    "Create Account",
-                    style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8, left: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    "Fill in your details below to get started on a ",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8, left: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    "seamless shopping experience. ",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("OR",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black)),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                height: 43,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey)),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset("assets/images/google.png"),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text(
-                        "Continue With Google",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              const Text("Create Account",
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(_errorMessage!,
+                      style: const TextStyle(color: Colors.red)),
                 ),
-              ),
-            ),
-            Text(
-              "Already have an account?",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16, left: 16, top: 24),
-              child: Container(
-                height: 56,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey)),
-                child: TextField(
-                  showCursor: true,
-                  decoration: InputDecoration(
-                      errorText: _isNotvalide ? "Enter firs name" : null,
-                      prefixIcon: Icon(Icons.person),
-                      hintText: "First name",
-                      hintStyle: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.normal),
-                      errorBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none),
+              _buildTextField("First Name", Icons.person, firstnameController),
+              _buildTextField("Last Name", Icons.person, lastnameController),
+              _buildTextField("Phone Number", Icons.phone, phoneController,
+                  isPhone: true),
+              _buildTextField("Email", Icons.mail, emailController,
+                  isEmail: true),
+              _buildTextField("Password", Icons.lock, passwordController,
+                  obscureText: true),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _isLoading ? null : registerUser,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: const Size(double.infinity, 48),
                 ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Create Account",
+                        style: TextStyle(fontSize: 16)),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16, left: 16, top: 16),
-              child: Container(
-                height: 56,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey)),
-                child: TextField(
-                  showCursor: true,
-                  decoration: InputDecoration(
-                      errorText: _isNotvalide ? "Enter last name" : null,
-                      prefixIcon: Icon(Icons.person),
-                      hintText: "Last name",
-                      hintStyle: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.normal),
-                      errorBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16, left: 16, top: 16),
-              child: Container(
-                height: 56,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey)),
-                child: TextField(
-                  showCursor: true,
-                  decoration: InputDecoration(
-                      errorText: _isNotvalide ? "Enter phone number" : null,
-                      prefixIcon: Icon(Icons.phone_android),
-                      hintText: "Enter phone",
-                      hintStyle: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.normal),
-                      errorBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16, left: 16, top: 16),
-              child: Container(
-                height: 56,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey)),
-                child: TextField(
-                  controller: emailController,
-                  showCursor: true,
-                  decoration: InputDecoration(
-                      errorText: _isNotvalide ? "Enter Proper Info" : null,
-                      prefixIcon: Icon(Icons.mail),
-                      hintText: "Email",
-                      hintStyle: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.normal),
-                      errorBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16, left: 16, top: 16),
-              child: Container(
-                height: 56,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey)),
-                child: TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  showCursor: true,
-                  decoration: InputDecoration(
-                      errorText: _isNotvalide ? "Enter Proper Info" : null,
-                      prefixIcon: Icon(Icons.lock),
-                      hintText: "Password",
-                      hintStyle: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.normal),
-                      errorBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16, left: 16, top: 16),
-              child: Container(
-                height: 56,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey)),
-                child: TextField(
-                  controller: passwordController,
-                  showCursor: false,
-                  decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock),
-                      hintText: "Confirm Password",
-                      hintStyle: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.normal),
-                      errorBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              child: Row(
-                children: [
-                  Text("By clicking Create Account, you acknowledge you"),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: Row(
-                children: [
-                  Text("have read and agreed to our Terms"),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: InkWell(
-                onTap: () {
-                  registerUser();
-                },
-                child: Container(
-                  height: 43,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Center(
-                      child: Text(
-                    "Create account",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  )),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+      String hint, IconData icon, TextEditingController controller,
+      {bool obscureText = false, bool isEmail = false, bool isPhone = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: isEmail
+            ? TextInputType.emailAddress
+            : (isPhone ? TextInputType.phone : TextInputType.text),
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon),
+          hintText: hint,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return "$hint is required";
+          }
+          if (isEmail && !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+            return "Enter a valid email address";
+          }
+          if (hint == "Password" && value.length < 8) {
+            return "Password must be at least 8 characters";
+          }
+          return null;
+        },
       ),
     );
   }

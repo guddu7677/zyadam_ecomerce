@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class AddCard extends StatefulWidget {
   const AddCard({super.key});
@@ -21,7 +22,7 @@ class _AddCardState extends State<AddCard> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomAppBar(
-        height: 60,
+        height: 100,
         child: Padding(
           padding: const EdgeInsets.all(4.0),
           child: Row(
@@ -35,8 +36,9 @@ class _AddCardState extends State<AddCard> {
                   height: 40,
                   width: 120,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: Colors.green),
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.green,
+                  ),
                   child: Center(
                     child: Text(
                       "ADD to Cart",
@@ -56,8 +58,9 @@ class _AddCardState extends State<AddCard> {
                   height: 40,
                   width: 120,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: Colors.green),
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.green,
+                  ),
                   child: Center(
                     child: Text(
                       "Buy Now",
@@ -68,14 +71,17 @@ class _AddCardState extends State<AddCard> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
       ),
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text("Add to Cart"),
+      ),
       body: ListView(
         children: [
+          // PageView for images
           Container(
             height: 200,
             width: double.infinity,
@@ -118,20 +124,19 @@ class _AddCardState extends State<AddCard> {
               },
             ),
           ),
+
+          // Product Title
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "Fresh Watermelon",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
+            child: Text(
+              "Fresh Watermelon",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
+
+          // Rating and Favorite Icon
           Padding(
-            padding: const EdgeInsets.only(right: 8, left: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -150,13 +155,15 @@ class _AddCardState extends State<AddCard> {
                     Text(
                       "(176)",
                       style: TextStyle(color: Colors.grey),
-                    )
+                    ),
                   ],
                 ),
-                Icon(Icons.favorite_border_outlined)
+                Icon(Icons.favorite_border_outlined),
               ],
             ),
           ),
+
+          // Price Section
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -182,11 +189,62 @@ class _AddCardState extends State<AddCard> {
               ],
             ),
           ),
+
+          // Description Section
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "Descreption",
+              "Description",
               style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            height: 150,
+            width: double.infinity,
+            // decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Our potatoes are perfect for home cooking, restaurants, and meal prepping. Whether you're making a simple side dish or preparing a hearty main course, these potatoes will bring out the best flavors in your recipes. Available in convenient 5lb bags.",
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.normal),
+              ),
+            ),
+          ),
+
+          // Related Products Section
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Related Products",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22),
+            ),
+          ),
+
+          // GridView for Related Products
+          Container(
+            height: 250, // Set a fixed height for the grid
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Two items per row
+                crossAxisSpacing: 8.0, // Horizontal space between items
+                mainAxisSpacing: 8.0, // Vertical space between items
+              ),
+              itemCount: 6, // Assuming 6 related products
+              itemBuilder: (context, index) {
+                return Card(
+                  color: Colors.blueAccent,
+                  child: Center(
+                    child: Text(
+                      'Item $index',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],

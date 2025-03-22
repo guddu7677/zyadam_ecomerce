@@ -12,28 +12,34 @@ class _My_CartState extends State<My_Cart> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.green,
         title: Text(
           "My Cart",
           style: TextStyle(
-              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: Column(
         children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: 2, // Adjust the number of items you want to display
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: EdgeInsets.all(10),
-                  child: ListTile(
-                    title: Text('Item $index'),
-                    subtitle: Text('Item details here'),
-                  ),
-                );
-              },
+          Card(
+            margin: EdgeInsets.all(10),
+            child: ListTile(
+              title: Text(
+                'Address',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text("vill+post-kapsiyawan,pincode-801302"),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              height: 150,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  color: Colors.blue, borderRadius: BorderRadius.circular(8)),
+            ),
+          )
         ],
       ),
     );

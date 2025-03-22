@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:zyadam_ecomere/bottom_nav_bar/bottom_nav_page/catogery.dart';
 import 'package:zyadam_ecomere/bottom_nav_bar/bottom_nav_page/my_account.dart';
 import 'package:zyadam_ecomere/bottom_nav_bar/bottom_nav_page/my_account/my_order.dart';
@@ -19,8 +20,16 @@ import 'package:zyadam_ecomere/pages/login_with_otp.dart';
 import 'package:zyadam_ecomere/pages/otp.dart';
 import 'package:zyadam_ecomere/tabBar/all_tab.dart';
 
-void main() {
-  runApp(zydam());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await dotenv.load(fileName: ".env"); // Ensure correct file name
+  } catch (e) {
+    print("Error loading .env file: $e");
+  }
+
+  runApp(const zydam());
 }
 
 class zydam extends StatelessWidget {
@@ -30,12 +39,12 @@ class zydam extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AddCard(),
+      home: login_page(),
       routes: {
         "/home_page": (context) => home_page(),
         "/login_signup": (context) => login_signup(),
         "/login_page": (context) => login_page(),
-        "/create_account": (context) => create_account(),
+        "/CreateAccount": (context) => CreateAccount(),
         "/First_homePage": (context) => First_homePage(),
         "/Bottombar": (context) => Bottombar(),
         "/Category_page": (context) => Category_page(),

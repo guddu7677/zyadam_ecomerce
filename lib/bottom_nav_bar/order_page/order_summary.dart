@@ -15,7 +15,7 @@ class _Order_SummaryState extends State<Order_Summary> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomAppBar(
-        height: 60,
+        height: 100,
         child: Padding(
           padding: const EdgeInsets.all(4.0),
           child: Row(
