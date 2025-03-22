@@ -39,7 +39,7 @@ class zydam extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: login_page(),
+      home: CreateAccount(),
       routes: {
         "/home_page": (context) => home_page(),
         "/login_signup": (context) => login_signup(),

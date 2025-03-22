@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class login_page extends StatefulWidget {
   const login_page({super.key});
@@ -15,7 +16,7 @@ class login_page extends StatefulWidget {
 class _LoginPageState extends State<login_page> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final storage = FlutterSecureStorage();
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
   bool _isNotValid = false;
   final String apiUrl = dotenv.env['FLUTTER_API_URL'] ?? '';
 
@@ -29,42 +30,41 @@ class _LoginPageState extends State<login_page> {
     }
 
     final url = Uri.parse("$apiUrl/auth/jwt/create/");
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email, "password": password}),
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      final refreshToken = data["refresh"];
-
-      final refreshUrl = Uri.parse("$apiUrl/auth/jwt/refresh/");
-      final refreshResponse = await http.post(
-        refreshUrl,
+    try {
+      final response = await http.post(
+        url,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"refresh": refreshToken}),
+        body: jsonEncode({"email": email, "password": password}),
       );
 
-      if (refreshResponse.statusCode == 200 ||
-          refreshResponse.statusCode == 201) {
-        final data = jsonDecode(refreshResponse.body);
-        final accessToken = data["access"];
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final refreshToken = data["refresh"];
 
-        final accesshUrl = Uri.parse("$apiUrl/auth/jwt/verify/");
-        final accessResponse = await http.post(
-          accesshUrl,
+        final refreshResponse = await http.post(
+          Uri.parse("$apiUrl/auth/jwt/refresh/"),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode({"token": accessToken}),
+          body: jsonEncode({"refresh": refreshToken}),
         );
-      }
 
-      print(refreshResponse.body);
-      // await storage.write(key: "access_token", value: data["access"]);
-      // await storage.write(key: "refresh_token", value: data["refresh"]);
-      // Navigator.pushNamed(context, "/Bottombar");
-    } else {
-      Get.snackbar("Login Failed", "Invalid email or password",
+        if (refreshResponse.statusCode == 200 ||
+            refreshResponse.statusCode == 201) {
+          final refreshData = jsonDecode(refreshResponse.body);
+          final accessToken = refreshData["access"];
+
+          await storage.write(key: 'token', value: accessToken);
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('session_token', accessToken);
+        }
+        Navigator.pushNamed(context, "/Bottombar");
+      } else {
+        Get.snackbar("Login Failed", "Invalid email or password",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
+    } catch (error) {
+      Get.snackbar("Error", "An error occurred. Please try again later.",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white);

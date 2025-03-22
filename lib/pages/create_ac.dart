@@ -24,12 +24,19 @@ class _CreateAccountState extends State<CreateAccount> {
   final String apiUrl = dotenv.env['FLUTTER_API_URL'] ?? '';
 
   bool _isLoading = false;
+  bool _obscurePassword = true;
   String? _errorMessage;
 
   void _toggleLoading(bool value) {
     if (mounted) {
       setState(() => _isLoading = value);
     }
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
   }
 
   Future<void> registerUser() async {
@@ -52,13 +59,12 @@ class _CreateAccountState extends State<CreateAccount> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(regBody),
       );
-      print("$apiUrl/account/user/register");
 
       var responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         setState(() =>
-            _errorMessage = responseData['msg'] ?? "Registration succesfully.");
+            _errorMessage = responseData['msg'] ?? "Registration successful.");
         Navigator.pushNamed(context, "/login_page");
       } else {
         setState(() =>
@@ -70,22 +76,6 @@ class _CreateAccountState extends State<CreateAccount> {
       setState(() => _errorMessage = "An error occurred. Please try again.");
     }
     _toggleLoading(false);
-  }
-
-  Future<void> notifyAdmin(Map<String, dynamic> userDetails) async {
-    try {
-      var response = await http.post(
-        Uri.parse("$apiUrl/admin/notify_new_user/"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(userDetails),
-      );
-
-      if (response.statusCode != 200) {
-        print("Failed to notify admin");
-      }
-    } catch (e) {
-      print("Error notifying admin: $e");
-    }
   }
 
   @override
@@ -114,8 +104,12 @@ class _CreateAccountState extends State<CreateAccount> {
                   isPhone: true),
               _buildTextField("Email", Icons.mail, emailController,
                   isEmail: true),
-              _buildTextField("Password", Icons.lock, passwordController,
-                  obscureText: true),
+              _buildTextField(
+                "Password",
+                Icons.lock,
+                passwordController,
+                obscureText: true,
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _isLoading ? null : registerUser,
@@ -142,7 +136,7 @@ class _CreateAccountState extends State<CreateAccount> {
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
-        obscureText: obscureText,
+        obscureText: obscureText ? _obscurePassword : false,
         keyboardType: isEmail
             ? TextInputType.emailAddress
             : (isPhone ? TextInputType.phone : TextInputType.text),
@@ -150,6 +144,14 @@ class _CreateAccountState extends State<CreateAccount> {
           prefixIcon: Icon(icon),
           hintText: hint,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          suffixIcon: obscureText
+              ? IconButton(
+                  icon: Icon(_obscurePassword
+                      ? Icons.visibility_off
+                      : Icons.visibility),
+                  onPressed: _togglePasswordVisibility,
+                )
+              : null,
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
